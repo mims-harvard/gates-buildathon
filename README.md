@@ -38,6 +38,13 @@ You can add your own graphs, biomedical or otherwise, without changing any code.
    cd ark-agent-cli
    ```
 
+   The knowledge graph files (`.parquet` in `data/`) are tracked with [Git LFS](https://git-lfs.com/). To download them after cloning, install Git LFS and pull the large files:
+
+   ```bash
+   git lfs install
+   git lfs pull
+   ```
+
 2. **Install dependencies**:
 
    ```bash
