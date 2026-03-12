@@ -163,7 +163,7 @@ export function deleteEntry(
 		for (let i = 0; i < lines.length; i++) {
 			const parsed = JSON.parse(lines[i]!);
 			if (i === 0 && "_schema" in parsed) continue; // skip schema header, rewriteBuffer adds it back
-			if (parsed.id === id && !deleted) {
+			if ((parsed.id === id || parsed.query_id === id) && !deleted) {
 				deleted = parsed;
 			} else {
 				kept.push(parsed);
@@ -262,7 +262,7 @@ export function updateEntry(
 			const parsed = JSON.parse(lines[i]!);
 			if (i === 0 && "_schema" in parsed) continue;
 
-			if (parsed.id === id && !updatedEntry) {
+			if ((parsed.id === id || parsed.query_id === id) && !updatedEntry) {
 				// Get the current guidance text (works for both feedback and knowledge entries)
 				const previousGuidance =
 					parsed.feedback_to_response_text ?? parsed.feedback_knowledge ?? "";
