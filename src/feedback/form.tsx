@@ -225,16 +225,25 @@ export function FeedbackForm({ onClose }: FeedbackFormProps) {
 		(text: string) => {
 			const captured = globalThis.__arkCapturedResponse;
 			if (captured) {
-				saveFeedback({
+				const feedbackData = {
 					query_id: captured.queryId,
 					query: captured.query,
 					response_text: captured.responseText,
-					retrieved_nodes: captured.retrievedNodes,
 					user_rating: accuracy,
 					user_harm: harm,
 					user_feedback: text,
 					timestamp: new Date().toISOString(),
+				};
+
+				// 1. Save to local file
+				saveFeedback({
+					...feedbackData,
+					retrieved_nodes: captured.retrievedNodes,
 				});
+
+				// 2. Emit event for agent to call saveFeedback TOOL
+				const event = new CustomEvent("arkFeedbackSubmitted", { detail: feedbackData });
+				(globalThis as unknown as EventTarget).dispatchEvent(event);
 			}
 			setStep("saved");
 		},
