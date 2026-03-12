@@ -12,8 +12,13 @@ import { DirectChatTransport, stepCountIs, ToolLoopAgent } from "ai";
 import { join } from "node:path";
 import { z } from "zod";
 
+import { makeFeedbackTools } from "./feedback-pipeline/index.ts";
 import { GraphLoader, makeParquetGraphTools } from "./parquet-tools/index.ts";
-import { graphAgentPrompt, regularPrompt } from "./prompts.ts";
+import {
+	feedbackPrompt,
+	graphAgentPrompt,
+	regularPrompt,
+} from "./prompts.ts";
 import { GetNodeDetailsTool } from "./tool-renderers/index.ts";
 
 export const env = createEnv({
@@ -26,6 +31,7 @@ export const env = createEnv({
 
 // Discover graph metadata instantly; parquet data loads lazily per agent
 const DATA_DIR = join(import.meta.dir, "..", "data");
+const FEEDBACK_BUFFER_PATH = join(DATA_DIR, "feedback_buffer.jsonl");
 const loader = new GraphLoader(DATA_DIR);
 
 const anthropic = createAnthropic({
@@ -55,10 +61,13 @@ const configValue: ConfigInput = {
 						loader,
 					)) as ToolSet;
 
+					// Create feedback tools — round 1 for now, can be dynamic later
+					const feedbackTools = makeFeedbackTools(FEEDBACK_BUFFER_PATH, 1);
+
 					const agent = new ToolLoopAgent({
 						model: anthropic("claude-opus-4-5"),
-						tools: graphTools,
-						instructions: `${regularPrompt}\n\n${graphAgentPrompt}`,
+						tools: { ...graphTools, ...feedbackTools } as ToolSet,
+						instructions: `${regularPrompt}\n\n${feedbackPrompt}\n\n${graphAgentPrompt}`,
 						stopWhen: stepCountIs(50),
 					});
 
