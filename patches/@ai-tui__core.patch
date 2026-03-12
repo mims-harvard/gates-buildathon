@@ -2,7 +2,7 @@ diff --git a/dist/index.mjs b/dist/index.mjs
 index 9d2195f55324dc4dfa7c4e7fbb1f9a78ab169020..80a0a05d8142492ad37281bdcbb8bf38fc1674f0 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -7629,17 +7629,30 @@ function CommandRegistration() {
+@@ -7629,17 +7629,34 @@ function CommandRegistration() {
  					dialog.push(/* @__PURE__ */ jsx(DialogHelp, {}));
  				}
  			},
@@ -15,7 +15,7 @@ index 9d2195f55324dc4dfa7c4e7fbb1f9a78ab169020..80a0a05d8142492ad37281bdcbb8bf38
 -					name: "quit",
 -					aliases: ["exit"]
 -				},
--				onSelect: () => exit(0)
+-			onSelect: () => exit(0)
 +		{
 +			id: "app.quit",
 +			title: "Quit",
@@ -34,6 +34,10 @@ index 9d2195f55324dc4dfa7c4e7fbb1f9a78ab169020..80a0a05d8142492ad37281bdcbb8bf38
 +			category: "Session",
 +			slash: { name: "feedback" },
 +			onSelect: (dialog) => {
++				if (!globalThis.__arkCapturedResponse) {
++					dialog.replace(jsx("box", { flexDirection: "column", gap: 1, paddingLeft: 2, paddingRight: 2, paddingBottom: 1, children: [jsx("box", { flexDirection: "row", justifyContent: "space-between", children: [jsx("text", { bold: true, children: "Feedback" }), jsx("text", { dim: true, children: "esc" })] }), jsx("text", { children: "No active response to provide feedback on. Send a query first." })] }));
++					return;
++				}
 +				const Form = globalThis.__arkFeedbackForm;
 +				if (Form) {
 +					dialog.replace(jsx(Form, { onClose: () => dialog.clear() }));
