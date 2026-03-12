@@ -33,6 +33,11 @@ When a user asks a question, first think about which knowledge graph is most rel
 - **inputSchema**: {"nodeId": "string", "query": "string" (optional), "nodeType": "string" (optional), "edgeType": "string" (optional), "k": "1" | "2" (optional)}
 - Use this to explore the connections of a specific node.
 
+### lookupPriorFeedback
+- **description**: Search saved user feedback for prior queries that involved the same knowledge graph nodes. Returns matching feedback entries with accuracy ratings, harm ratings, and free-text comments, along with which node IDs overlapped and how many.
+- **inputSchema**: {"nodeIds": ["string"]}
+- **IMPORTANT**: After retrieving nodes from the knowledge graph, call this tool with all the node IDs you have collected so far. If prior feedback is returned, it means a user previously provided feedback about a prediction involving the same nodes — consider it carefully when formulating your response, as it may contain corrections or important context.
+
 ## Example of how to proceed:
 
 Question: What are the neighbors of the A2M gene/protein?

@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 
+import { searchFeedback } from "../feedback/index.ts";
 import type { createQueries } from "./queries.ts";
 import type { KnowledgeGraphMeta } from "./types.ts";
 
@@ -344,6 +345,29 @@ export const makeListAvailableGraphs = (
 		},
 	});
 
+export const makeLookupPriorFeedbackTool = () =>
+	tool({
+		description:
+			"Search saved user feedback for prior queries that involved the same knowledge graph nodes. Returns any matching feedback (accuracy ratings, harm ratings, and free-text comments) along with which node IDs overlapped and how many. Use this after retrieving nodes to check if a user has previously provided feedback about a similar prediction.",
+		inputSchema: z.object({
+			nodeIds: z
+				.array(z.string())
+				.describe(
+					"The node IDs to search for in prior feedback. Pass all node IDs you have retrieved so far.",
+				),
+		}),
+		execute: async ({ nodeIds }) => {
+			const matches = searchFeedback(nodeIds);
+			if (matches.length === 0) {
+				return { matches: [], message: "No prior feedback found for these nodes." };
+			}
+			return {
+				matches,
+				message: `Found ${matches.length} prior feedback entry${matches.length === 1 ? "" : "ies"} involving overlapping nodes. Feedback about a similar prediction was previously given and may be related — consider it when formulating your response.`,
+			};
+		},
+	});
+
 export const makeGraphTools = (
 	knowledgeGraphIds: number[],
 	queries: Queries,
@@ -377,6 +401,7 @@ export const makeGraphTools = (
 				};
 	return {
 		listAvailableGraphs,
+		lookupPriorFeedback: makeLookupPriorFeedbackTool(),
 		...queryingTools,
 	};
 };

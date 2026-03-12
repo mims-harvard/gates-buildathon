@@ -3,3 +3,5 @@ export { FeedbackForm } from "./form.tsx";
 export { saveFeedback, generateQueryId } from "./store.ts";
 export type { FeedbackData, RetrievedNode } from "./store.ts";
 export type { FeedbackFormProps, CapturedResponseData } from "./globals.ts";
+export { searchFeedback } from "./lookup.ts";
+export type { FeedbackMatch } from "./lookup.ts";
