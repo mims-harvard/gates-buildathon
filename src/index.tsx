@@ -13,6 +13,7 @@ import { join } from "node:path";
 import { z } from "zod";
 
 import { makeFeedbackTools } from "./feedback-pipeline/index.ts";
+import { FeedbackChatTransport, FeedbackForm } from "./feedback/index.ts";
 import { GraphLoader, makeParquetGraphTools } from "./parquet-tools/index.ts";
 import {
 	feedbackPrompt,
@@ -71,10 +72,12 @@ const configValue: ConfigInput = {
 						stopWhen: stepCountIs(50),
 					});
 
-					return new DirectChatTransport({
-						agent,
-						...transportOptions,
-					}) as ChatTransport<UIMessage>;
+				const inner = new DirectChatTransport({
+					agent,
+					...transportOptions,
+				}) as ChatTransport<UIMessage>;
+
+				return new FeedbackChatTransport(inner);
 				},
 			}),
 	) as ConfigInput["agents"],
@@ -89,6 +92,9 @@ const configValue: ConfigInput = {
 		],
 	},
 };
+
+// Register the feedback form so the patched /feedback slash command can find it
+globalThis.__arkFeedbackForm = FeedbackForm;
 
 const tui = new TerminalUI(configValue);
 await tui.run();
