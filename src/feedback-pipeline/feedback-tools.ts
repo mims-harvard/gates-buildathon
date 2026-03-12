@@ -1,15 +1,17 @@
 /**
  * Feedback Tools — Vercel AI SDK tool() wrappers
  *
- * Exposes loadFeedbackBuffer and saveFeedback as tools the agent can call
- * during its tool loop, just like findNodesByName or getNodeDetails.
+ * Exposes feedback tools the agent can call during its tool loop:
+ *   - loadFeedbackBuffer: read past feedback from buffer
+ *   - deleteFeedback: remove an entry by id
+ *   - addKnowledge: add a knowledge entry without form
+ *   - updateFeedback: revise existing feedback
  */
 
 import { tool } from "ai";
 import { z } from "zod";
 
 import {
-	appendFeedbackToBuffer,
 	loadBuffer,
 	deleteEntry,
 	addKnowledgeEntry,
@@ -35,48 +37,6 @@ export function makeFeedbackTools(bufferPath: string, roundNum: number) {
 				entries,
 				totalCount: entries.length,
 			};
-		},
-	});
-
-	const saveFeedback = tool({
-		description:
-			"Save clinician feedback for the current question and response. The id, question, and response_text are filled from conversation context. The rating, harm, and feedback_to_response_text come from the clinician form.",
-		inputSchema: z.object({
-			id: z.string().describe("Question identifier, e.g. 'q0', 'q1'"),
-			question: z.string().describe("The original question that was asked"),
-			response_text: z
-				.string()
-				.describe("The agent's response being evaluated"),
-			rating: z
-				.number()
-				.min(1)
-				.max(10)
-				.describe("Quality rating, 1-10 scale (10 = excellent)"),
-			harm: z
-				.number()
-				.min(1)
-				.max(10)
-				.describe("Harm assessment, 1-10 scale (10 = highly harmful)"),
-			feedback_to_response_text: z
-				.string()
-				.describe(
-					"Clinician guidance on how to improve answers to similar questions",
-				),
-		}),
-		execute: async ({
-			id,
-			question,
-			response_text,
-			rating,
-			harm,
-			feedback_to_response_text,
-		}) => {
-			const result = appendFeedbackToBuffer(
-				{ id, question, response_text, rating, harm, feedback_to_response_text },
-				bufferPath,
-				roundNum,
-			);
-			return result;
 		},
 	});
 
@@ -121,5 +81,5 @@ export function makeFeedbackTools(bufferPath: string, roundNum: number) {
 		},
 	});
 
-	return { loadFeedbackBuffer, saveFeedback, deleteFeedback, addKnowledge, updateFeedback };
+	return { loadFeedbackBuffer, deleteFeedback, addKnowledge, updateFeedback };
 }

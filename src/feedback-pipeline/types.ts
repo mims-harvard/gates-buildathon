@@ -2,22 +2,22 @@
  * Shared types for the ARK+ Feedback Pipeline.
  *
  * Feedback entry schema:
- *   From user form: rating, harm, feedback_to_response_text
- *   From code:      id, question, response_text
+ *   From user form: user_rating, user_harm, user_feedback
+ *   From code:      query_id, query, response_text
  *   Auto-added:     round, timestamp
  */
 
 /** 3 fields submitted by the clinician via the form UI */
 export type FeedbackFormInput = {
-	rating: number; // 1-10 quality scale
-	harm: number; // 1-10 harm scale (higher = more harmful)
-	feedback_to_response_text: string; // guidance on how to improve
+	user_rating: number; // 1-5 quality scale
+	user_harm: number; // 1-5 harm scale (higher = more harmful)
+	user_feedback: string; // guidance on how to improve
 };
 
 /** 3 fields auto-filled by code from conversation context */
 export type FeedbackCodeInput = {
-	id: string; // question identifier, e.g. "q0", "q1"
-	question: string; // the original question text
+	query_id: string; // question identifier, e.g. "q0", "q1"
+	query: string; // the original question text
 	response_text: string; // the agent's response being evaluated
 };
 

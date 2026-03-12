@@ -29,7 +29,7 @@ import type {
 const SCHEMA_HEADER: FeedbackSchemaHeader = {
 	_schema: "Feedback Buffer",
 	_guidance:
-		"Each entry contains: id (question id), question (the question text), response_text (the initial LLM response being evaluated), rating (1-10 quality), harm (1-10 harm scale), feedback_to_response_text (guidance for LLM on how to improve answers to similar questions), round (iteration number), timestamp (when feedback was collected). The feedback_to_response_text is ground truth guidance on how the LLM should attend to the question next time, NOT criticism of the response itself.",
+		"Each entry contains: query_id (question id), query (the question text), response_text (the initial LLM response being evaluated), user_rating (1-5 quality), user_harm (1-5 harm scale), user_feedback (guidance for LLM on how to improve answers to similar questions), round (iteration number), timestamp (when feedback was collected). The user_feedback is ground truth guidance on how the LLM should attend to the question next time, NOT criticism of the response itself.",
 };
 
 /**
@@ -43,6 +43,7 @@ export function appendFeedbackToBuffer(
 	entry: FeedbackEntry,
 	bufferPath: string,
 	roundNum: number,
+	timestamp?: string,
 ): AppendResult {
 	try {
 		const isNewFile = !existsSync(bufferPath);
@@ -63,7 +64,7 @@ export function appendFeedbackToBuffer(
 		const storedEntry: StoredFeedbackEntry = {
 			...entry,
 			round: roundNum,
-			timestamp: new Date().toISOString(),
+			timestamp: timestamp || new Date().toISOString(),
 		};
 		data += JSON.stringify(storedEntry) + "\n";
 
@@ -97,7 +98,7 @@ export function appendFeedbackToBuffer(
  * - Returns empty if file doesn't exist.
  */
 export function loadBuffer(bufferPath: string): {
-	entries: StoredFeedbackEntry[];
+	entries: (StoredFeedbackEntry | KnowledgeEntry)[];
 	schemaInfo: FeedbackSchemaHeader | null;
 } {
 	if (!existsSync(bufferPath)) {
@@ -107,7 +108,7 @@ export function loadBuffer(bufferPath: string): {
 	const content = readFileSync(bufferPath, "utf-8");
 	const lines = content.split("\n").filter((l) => l.trim().length > 0);
 
-	const entries: StoredFeedbackEntry[] = [];
+	const entries: (StoredFeedbackEntry | KnowledgeEntry)[] = [];
 	let schemaInfo: FeedbackSchemaHeader | null = null;
 
 	for (let i = 0; i < lines.length; i++) {
@@ -116,7 +117,7 @@ export function loadBuffer(bufferPath: string): {
 		if (i === 0 && "_schema" in parsed) {
 			schemaInfo = parsed as FeedbackSchemaHeader;
 		} else {
-			entries.push(parsed as StoredFeedbackEntry);
+			entries.push(parsed as StoredFeedbackEntry | KnowledgeEntry);
 		}
 	}
 
@@ -201,7 +202,7 @@ export function addKnowledgeEntry(
 		const { entries } = loadBuffer(bufferPath);
 		let maxKId = -1;
 		for (const e of entries) {
-			if (e.id && e.id.startsWith("k")) {
+			if ("id" in e && e.id.startsWith("k")) {
 				const num = parseInt(e.id.slice(1), 10);
 				if (!isNaN(num) && num > maxKId) maxKId = num;
 			}

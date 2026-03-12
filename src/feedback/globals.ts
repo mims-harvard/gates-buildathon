@@ -20,9 +20,23 @@ export type FeedbackFormProps = {
 	onClose: () => void;
 };
 
+export type FeedbackSubmissionData = {
+	query_id: string;
+	query: string;
+	response_text: string;
+	user_rating: number;
+	user_harm: number;
+	user_feedback: string;
+	timestamp: string;
+};
+
 declare global {
 	// biome-ignore lint: augmenting globalThis
 	var __arkFeedbackForm: ComponentType<FeedbackFormProps> | undefined;
 	// biome-ignore lint: augmenting globalThis
 	var __arkCapturedResponse: CapturedResponseData | undefined;
+	// biome-ignore lint: augmenting globalThis
+	interface GlobalEventHandlersEventMap {
+		arkFeedbackSubmitted: CustomEvent<FeedbackSubmissionData>;
+	}
 }
