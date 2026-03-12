@@ -12,7 +12,7 @@ import { DirectChatTransport, stepCountIs, ToolLoopAgent } from "ai";
 import { join } from "node:path";
 import { z } from "zod";
 
-import { FeedbackChatTransport } from "./feedback/index.ts";
+import { FeedbackChatTransport, FeedbackForm } from "./feedback/index.ts";
 import { GraphLoader, makeParquetGraphTools } from "./parquet-tools/index.ts";
 import { graphAgentPrompt, regularPrompt } from "./prompts.ts";
 import { GetNodeDetailsTool } from "./tool-renderers/index.ts";
@@ -83,6 +83,9 @@ const configValue: ConfigInput = {
 		],
 	},
 };
+
+// Register the feedback form so the patched /feedback slash command can find it
+globalThis.__arkFeedbackForm = FeedbackForm;
 
 const tui = new TerminalUI(configValue);
 await tui.run();
