@@ -30,7 +30,7 @@ index 9d2195f55324dc4dfa7c4e7fbb1f9a78ab169020..80a0a05d8142492ad37281bdcbb8bf38
 +		{
 +			id: "custom.feedback",
 +			title: "Provide feedback",
-+			description: "Rate accuracy, clinical harm risk, and leave comments",
++			description: "Provide user feedback",
 +			category: "Session",
 +			slash: { name: "feedback" },
 +			onSelect: (dialog) => {
