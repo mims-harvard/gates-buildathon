@@ -36,9 +36,44 @@ export type FeedbackSchemaHeader = {
 	_guidance: string;
 };
 
+/** A knowledge entry added via chat (no form required) */
+export type KnowledgeEntry = {
+	id: string; // auto-generated, e.g. "k0", "k1"
+	feedback_knowledge: string; // the guidance text
+	round: number;
+	timestamp: string;
+};
+
+/** A revision appended to an existing feedback entry */
+export type Revision = {
+	revised_at: string; // UTC ISO format
+	previous_guidance: string;
+	updated_guidance: string;
+	reason: string;
+};
+
+/** Stored entry that may have revisions (feedback or knowledge) */
+export type StoredEntryWithRevisions = StoredFeedbackEntry & {
+	revisions?: Revision[];
+};
+
 /** Return type of appendFeedbackToBuffer */
 export type AppendResult = {
 	success: boolean;
 	message: string;
 	entryCount: number | null;
+};
+
+/** Return type of deleteEntry */
+export type DeleteResult = {
+	success: boolean;
+	message: string;
+	deletedEntry: StoredFeedbackEntry | KnowledgeEntry | null;
+};
+
+/** Return type of updateEntry */
+export type UpdateResult = {
+	success: boolean;
+	message: string;
+	updatedEntry: StoredEntryWithRevisions | null;
 };
